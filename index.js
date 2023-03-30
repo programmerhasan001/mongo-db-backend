@@ -1,21 +1,24 @@
 const express = require("express");
+const mongoose = require('mongoose');
+const cors = require('cors');
 const app = express();
 const PORT = 3001;
 
-const mongoose = require('mongoose');
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+};
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
 // create schema
-const productSchema = new mongoose.Schema({
-    title: {
+const usersSchema = new mongoose.Schema({
+    name: {
         type: String,
         required: true
     },
-    price: {
-        type: Number,
-        required: true
-    },
-    description: {
+    email: {
         type: String,
         required: true
     },
@@ -25,12 +28,12 @@ const productSchema = new mongoose.Schema({
     }
 })
 // create Model
-const Product = mongoose.model("products", productSchema);
+const User = mongoose.model("users", usersSchema);
 
 // CONNECT DATABASE
 const connectDb = async () => {
     try {
-        await mongoose.connect('mongodb://localhost:27017/testProductDb');
+        await mongoose.connect('mongodb://localhost:27017/users');
         console.log('data base is connected');
     } catch (err) {
         console.log('Not Connected');
@@ -61,16 +64,15 @@ app.get('/', (req, res) => {
     res.end();
 })
 
-app.post("/products", async (req, res) => {
+app.post("/users", async (req, res) => {
     try {
-        const title = req.body.title;
-        const price = req.body.price;
-        const description = req.body.description;
+        const name = req.body.name;
+        const email = req.body.email;
         // res.status(201).send({ title, price, description });
 
-        const newProduct = new Product({ title, price, description });
-        const productData = await newProduct.save();
-        res.status(201).send(JSON.stringify(productData))
+        const newUser = new User({ name, email });
+        const userData = await newUser.save();
+        res.status(201).send(JSON.stringify(userData))
     } catch (err) {
         res.status(500).send({ message: err.message })
     }
